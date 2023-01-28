@@ -1,11 +1,10 @@
 
 export default  class FormValidator {
-
-    constructor(obj, formElement) {
-        this._obj = obj;
+    constructor(validationConfig, formElement) {
+        this._validationConfig = validationConfig;
         this._element = formElement;
-        this._inputList = Array.from(this._element.querySelectorAll(this._obj.inputSelector));
-        this._button = this._element.querySelector(this._obj.submitButtonSelector);
+        this._inputList = Array.from(this._element.querySelectorAll(this._validationConfig.inputSelector));
+        this._button = this._element.querySelector(this._validationConfig.submitButtonSelector);
     }
 
     _hasInvalidInput() {
@@ -15,12 +14,12 @@ export default  class FormValidator {
     }
 
     disableButton() {
-        this._button.classList.add(this._obj.inactiveButtonClass);
+        this._button.classList.add(this._validationConfig.inactiveButtonClass);
         this._button.disabled = true;
     }
 
     _enableButton() {
-        this._button.classList.remove(this._obj.inactiveButtonClass);
+        this._button.classList.remove(this._validationConfig.inactiveButtonClass);
         this._button.disabled = false;
     }
 
@@ -33,15 +32,15 @@ export default  class FormValidator {
     }
 
     _hideInputError(inputElement, errorElement) {
-        inputElement.classList.remove(this._obj.inputErrorClass);
-        errorElement.classList.remove(this._obj.errorClass);
+        inputElement.classList.remove(this._validationConfig.inputErrorClass);
+        errorElement.classList.remove(this._validationConfig.errorClass);
         errorElement.textContent = '';
     }
 
     _showInputError(inputElement, errorElement) {
-        inputElement.classList.add(this._obj.inputErrorClass);
+        inputElement.classList.add(this._validationConfig.inputErrorClass);
         errorElement.textContent = inputElement.validationMessage;
-        errorElement.classList.add(this._obj.errorClass);
+        errorElement.classList.add(this._validationConfig.errorClass);
     }
 
     _toggleInputErrorState(inputElement) {
@@ -74,5 +73,4 @@ export default  class FormValidator {
             this._setEventListeners(inputElement);
         });
     }
-
 }

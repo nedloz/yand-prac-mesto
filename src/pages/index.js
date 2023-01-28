@@ -28,6 +28,7 @@ formList.forEach((form) => {
   const formName = form.getAttribute('name');
   formValidators[formName] = validator;
 })
+
 const enableValidation = () => {
   formList.forEach((form) => {
     const formName = form.getAttribute('name')
@@ -35,46 +36,49 @@ const enableValidation = () => {
   })
 }
 
-
-const setCards = (obj, userID) => {
+const setCards = (items, userID) => {
   const section = createSection(userID)
-  section.renderItems(obj)
-}
-const setProfileInfo = (obj) => {
-  userInfo.setUserInfo(obj)
-  userInfo.setUserImage(obj.avatar)
+  section.renderItems(items)
 }
 
+const setProfileInfo = (Info) => {
+  userInfo.setUserInfo(Info)
+  userInfo.setUserImage(Info.avatar)
+}
 
 const handleAddButtonClick = () => {
   formValidators['card-form'].resetValidation()
-  cardPopup.openPopup()
+  cardPopup.open()
 }
 const handleProfileEditButtonClick = () => {
   const oldUserInfo = userInfo.getUserInfo()
   profilePopup.setInputValues(oldUserInfo)
-  profilePopup.openPopup()
+  profilePopup.open()
 }
 const handleAvatarEditButtonClick = () => {
-  formValidators['update-avatar-form'].resetValidation
-  updateAvatarPopup.openPopup()
+  formValidators['update-avatar-form'].resetValidation()
+  updateAvatarPopup.open()
 }
-
 
 const handleCardClick = (src, name) => {
-  imgPopup.openPopup(src, name);
+  imgPopup.open(src, name);
 }
-const handleLikeClick = (likeState, cardId) => {
+
+const handleLikeClick = (likeState, cardId, cardClass) => {
   if (likeState) {
-    return api.setLike(cardId)
+    api.setLike(cardId)
+      .then(res => {cardClass._getLikes(res.likes)})
       .catch(err => console.log(err))
+
   } else {
-    return api.removeLike(cardId)
+    api.removeLike(cardId)
+      .then(res => {cardClass._getLikes(res.likes)})
       .catch(err => console.log(err))
   }
 }
+
 const handleTrashClick = (cardId) => {
-  confirmPopup.openPopup(cardId)
+  confirmPopup.open(cardId)
 }
 
 const createCard = (item, userID) => { 
@@ -83,51 +87,52 @@ const createCard = (item, userID) => {
   return cardEl
 }
 
-
 const getNewCard = (data) => {
-  return api.sendNewCard(data)
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+  api.sendNewCard(data)
   .then((data) => {
-    const newCard = createCard(data, userId)
-    const container = document.querySelector(cardsContainerSelector)
-    container.prepend(newCard)
+    getUserInfo.then((res) => {
+      const newCard = createCard(data, res._id)
+      const container = document.querySelector(cardsContainerSelector)
+      container.prepend(newCard)
+    })
+  })
+  .then(() => {
+    cardPopup.close()
+    cardPopup.renderLoading(false)
   })
   .catch(err => console.log(err))
-}
-const setUserInfo = (data) => {
-  return api.sendUserInfo(data)
-    .then(() => userInfo.setUserInfo(data))
-    .catch(err => console.log(err))
-}
-const setAvatarImage = (link) => {
-  return api.sendUserAvatar(link)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      } 
-      return Promise.reject(`Ошибка: ${res.status}`); 
-    })
-    .then(res => setProfileInfo(res))
-    .catch(err => console.log(err))
-}
-const deleteCard = (cardId) => {
-  api.deleteCard(cardId)
-  .catch(err => console.log(err))
-  .then(setDefaultCards(userId))
 }
 
+const setUserInfo = (data) => {
+  api.sendUserInfo(data)
+    .then(userInfo.setUserInfo(data))
+    .then(() => {
+      profilePopup.close()
+      profilePopup.renderLoading(false)
+    })
+    .catch(err => console.log(err))
+}
+
+const setAvatarImage = (link) => {
+  api.sendUserAvatar(link)
+    .then(res => setProfileInfo(res))
+    .then(() => {
+      updateAvatarPopup.close()
+      updateAvatarPopup.renderLoading(false)
+    })
+    .catch(err => console.log(err))
+}
+
+const deleteCard = (cardId) => {
+    api.deleteCard(cardId)
+      .then((res) => setDefaultCards(res._id))
+      .catch(err => console.log(err))
+}
 
 const confirmPopup =  new PopupWithConfirmation(confirmPopupSelector, popupButton, deleteCard)
-
 const updateAvatarPopup = new PopupWithForm(updateAvatarPopupSelector, setAvatarImage)
 const profilePopup = new PopupWithForm(profilePopupSelector, setUserInfo);
 const cardPopup = new PopupWithForm(cardPopupSelector, getNewCard);
-
 const imgPopup = new PopupWithImage(imagePopupSelector);
 const userInfo = new UserInfo({name: profileNameSelector, description: profileDescriptionSelector, image: profileImagePlace});
 
@@ -149,47 +154,23 @@ const api = new Api({
   }
 })
 
-
 avatarEditButton.addEventListener('click', handleAvatarEditButtonClick)
 profileEditButton.addEventListener('click', handleProfileEditButtonClick)
 profileAddButton.addEventListener('click', handleAddButtonClick)
 
 const setDefaultCards = (userID) => {
   api.getCardsinfo()
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
   .then(res => setCards(res, userID))
   .catch(err => console.log(err))
 }
-const userId = api.getUserInfo()
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
-  .then(res => res._id)
+
+const getUserInfo = api.getUserInfo()
   .catch(err => console.log(err))
-
-
-api.getUserInfo()
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+  
+getUserInfo
   .then(res => {
     setProfileInfo(res)
     setDefaultCards(res._id)
   })
-  // .then(res => setDefaultCards(res._id))
-
-  .catch(err => console.log(err))
-
 
 enableValidation()

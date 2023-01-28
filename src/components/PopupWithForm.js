@@ -24,32 +24,28 @@ export default class PopupWithForm extends Popup {
         return inputValuesList
     }
 
-    renderLoading(isLoading, button) {
+    renderLoading(isLoading) {  
         if (isLoading) {
-            if (this.popupSelector == '.profile-popup' || this.popupSelector == '.update-avatar-popup') {
-                button.value = 'Сохранение...'
-            } else if (this.popupSelector == '.card-popup') {
-                button.value = 'Создать'
+            if (this.popupSelector === '.profile-popup' || this.popupSelector === '.update-avatar-popup') {
+                this.button.value = 'Сохранение...'
+            } else if (this.popupSelector === '.card-popup') {
+                this.button.value = 'Создание...'
             }
             
           } else {
-            if (this.popupSelector == '.profile-popup' || this.popupSelector == '.update-avatar-popup') {
-                button.value = 'Сохранить'
-            } else if (this.popupSelector == '.card-popup') {
-                button.value = 'Создать'
+            if (this.popupSelector === '.profile-popup' || this.popupSelector === '.update-avatar-popup') {
+                this.button.value = 'Сохранить'
+            } else if (this.popupSelector === '.card-popup') {
+                this.button.value = 'Создать'
             }
-            
           }
     }
     
     _submit(evt) {
         evt.preventDefault()
-        this.renderLoading(true, this.button)
+        this.renderLoading(true)
         const list = this._getInputValues() 
-        this.submitCallBack(list)
-            .then(this.closePopup())
-            .finally(this.renderLoading(false, this.button))
-        
+        this.submitCallBack(list)        
     }
 
     _setEventListeners() {
@@ -62,8 +58,8 @@ export default class PopupWithForm extends Popup {
         this.form.removeEventListener('submit', this._submit)
     }
 
-    closePopup() {
-        super.closePopup()
+    close() {
+        super.close()
         this.form.reset()
     }
 }
