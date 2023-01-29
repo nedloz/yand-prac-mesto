@@ -90,8 +90,10 @@ const createCard = (item, userID) => {
 const getNewCard = (data) => {
   api.sendNewCard(data)
   .then((data) => {
+    // getUserInfo.then((res) => {
       const newCard = createCard(data, userID)
       container.prepend(newCard)
+    // })
   })
   .then(cardPopup.close())
   .catch(err => console.log(err))
@@ -149,6 +151,22 @@ avatarEditButton.addEventListener('click', handleAvatarEditButtonClick)
 profileEditButton.addEventListener('click', handleProfileEditButtonClick)
 profileAddButton.addEventListener('click', handleAddButtonClick)
 
+const setDefaultCards = (userID) => {
+  api.getCardsinfo()
+  .then(res => setCards(res, userID))
+  .catch(err => console.log(err))
+}
+
+// const getUserInfo = api.getUserInfo()
+//   .catch(err => console.log(err))
+
+// getUserInfo 
+//   .then(res => { 
+//     setProfileInfo(res)
+//     setDefaultCards(res._id)
+//   })
+//   .catch(err => console.log(err))
+
 let userID
 Promise.all([api.getUserInfo(), api.getCardsinfo()])
   .then(([userInfo, cards]) => {
@@ -157,5 +175,4 @@ Promise.all([api.getUserInfo(), api.getCardsinfo()])
     setCards(cards, userID)
   })
   .catch(err => console.log(err))
-
 enableValidation()
