@@ -87,18 +87,11 @@ const createCard = (item, userID) => {
   return cardEl
 }
 
-// Не понимаю вашего комментария по поводу 2х запросов серверу. Якобы у меня 2 запроса и один из них только для userId. 
-// Я не согласен с этим, т.к. у меня всего 1 запрос (это можно увидеть во вкладке сеть в браузере) промис которого я сохраняю в константе. 
-// Дальше я работаю с уже полученным промисом. И в том числе беру оттуда userId.
-// https://disk.yandex.ru/i/YosmCQpOm2UQCQ фото после загрузки страницы и создания новой карточки.
-
 const getNewCard = (data) => {
   api.sendNewCard(data)
   .then((data) => {
-    getUserInfo.then((res) => {
-      const newCard = createCard(data, res._id)
+      const newCard = createCard(data, userID)
       container.prepend(newCard)
-    })
   })
   .then(cardPopup.close())
   .catch(err => console.log(err))
@@ -156,19 +149,12 @@ avatarEditButton.addEventListener('click', handleAvatarEditButtonClick)
 profileEditButton.addEventListener('click', handleProfileEditButtonClick)
 profileAddButton.addEventListener('click', handleAddButtonClick)
 
-const setDefaultCards = (userID) => {
-  api.getCardsinfo()
-  .then(res => setCards(res, userID))
-  .catch(err => console.log(err))
-}
-
-const getUserInfo = api.getUserInfo()
-  .catch(err => console.log(err))
-
-getUserInfo 
-  .then(res => { 
-    setProfileInfo(res)
-    setDefaultCards(res._id)
+let userID
+Promise.all([api.getUserInfo(), api.getCardsinfo()])
+  .then(([userInfo, cards]) => {
+    setProfileInfo(userInfo)
+    userID = userInfo._id
+    setCards(cards, userID)
   })
   .catch(err => console.log(err))
 
