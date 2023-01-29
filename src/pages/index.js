@@ -16,7 +16,7 @@ import {
   profileNameSelector, profileDescriptionSelector, 
   profileImagePlace, 
   avatarEditButton, profileEditButton, profileAddButton, popupButton,
-  cardsContainerSelector
+  cardsContainerSelector, container
 } from '../utils/Constants';
 
 
@@ -87,40 +87,38 @@ const createCard = (item, userID) => {
   return cardEl
 }
 
+// Не понимаю вашего комментария по поводу 2х запросов серверу. Якобы у меня 2 запроса и один из них только для userId. 
+// Я не согласен с этим, т.к. у меня всего 1 запрос (это можно увидеть во вкладке сеть в браузере) промис которого я сохраняю в константе. 
+// Дальше я работаю с уже полученным промисом. И в том числе беру оттуда userId.
+// https://disk.yandex.ru/i/YosmCQpOm2UQCQ фото после загрузки страницы и создания новой карточки.
+
 const getNewCard = (data) => {
   api.sendNewCard(data)
   .then((data) => {
     getUserInfo.then((res) => {
       const newCard = createCard(data, res._id)
-      const container = document.querySelector(cardsContainerSelector)
       container.prepend(newCard)
     })
   })
-  .then(() => {
-    cardPopup.close()
-    cardPopup.renderLoading(false)
-  })
+  .then(cardPopup.close())
   .catch(err => console.log(err))
+  .finally(cardPopup.renderLoading(false))
 }
 
 const setUserInfo = (data) => {
   api.sendUserInfo(data)
     .then(userInfo.setUserInfo(data))
-    .then(() => {
-      profilePopup.close()
-      profilePopup.renderLoading(false)
-    })
+    .then(profilePopup.close())
     .catch(err => console.log(err))
+    .finally(profilePopup.renderLoading(false))
 }
 
 const setAvatarImage = (link) => {
   api.sendUserAvatar(link)
     .then(res => setProfileInfo(res))
-    .then(() => {
-      updateAvatarPopup.close()
-      updateAvatarPopup.renderLoading(false)
-    })
+    .then(updateAvatarPopup.close())
     .catch(err => console.log(err))
+    .finally(updateAvatarPopup.renderLoading(false))
 }
 
 const deleteCard = (cardId) => {
@@ -166,11 +164,12 @@ const setDefaultCards = (userID) => {
 
 const getUserInfo = api.getUserInfo()
   .catch(err => console.log(err))
-  
-getUserInfo
-  .then(res => {
+
+getUserInfo 
+  .then(res => { 
     setProfileInfo(res)
     setDefaultCards(res._id)
   })
+  .catch(err => console.log(err))
 
 enableValidation()

@@ -4,7 +4,7 @@ export default class Api {
         this.headers = options.headers
     }
 
-    isOk(res) {
+    _checkResponse(res) {
         if (res.ok) {
             return res.json();
           }
@@ -15,14 +15,14 @@ export default class Api {
         return fetch(`${this.baseUrl}/users/me`, {
             headers: this.headers
         })
-        .then(res => this.isOk(res))
+        .then(res => this._checkResponse(res))
     }
 
     getCardsinfo() {
         return fetch(`${this.baseUrl}/cards`, {
             headers: this.headers
         })
-        .then(res => this.isOk(res))
+        .then(res => this._checkResponse(res))
     }
     
     sendUserInfo(obj) {
@@ -39,7 +39,7 @@ export default class Api {
             headers: this.headers,
             body: JSON.stringify(obj)
         })
-        .then(res => this.isOk(res))
+        .then(res => this._checkResponse(res))
     }
     
     sendNewCard(obj) {
@@ -48,27 +48,27 @@ export default class Api {
             headers: this.headers,
             body: JSON.stringify(obj)
         })
-        .then(res => this.isOk(res))
+        .then(res => this._checkResponse(res))
     }
 
     deleteCard(cardId) {
         return fetch(`${this.baseUrl}/cards/${cardId}`, {
             method: 'DELETE',
             headers: this.headers
-        }).then(res => this.isOk(res))
+        }).then(res => this._checkResponse(res))
     }
 
     setLike(cardId) {
         return fetch(`${this.baseUrl}/cards/${cardId}/likes `, {
             method: 'PUT',
             headers: this.headers
-        }).then(res => this.isOk(res))
+        }).then(res => this._checkResponse(res))
     }
 
     removeLike(cardId) {
         return fetch(`${this.baseUrl}/cards/${cardId}/likes `, {
             method: 'DELETE',
             headers: this.headers
-        }).then(res => this.isOk(res))
+        }).then(res => this._checkResponse(res))
     }
 }

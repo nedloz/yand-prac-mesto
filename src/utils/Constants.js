@@ -1,5 +1,6 @@
 export const cardTemplateSelector = '.place-template'
 export const cardsContainerSelector = '.places'
+export const container = document.querySelector(cardsContainerSelector)
 export const imagePopupSelector = '.image-popup'
 export const profilePopupSelector = '.profile-popup'
 export const cardPopupSelector = '.card-popup'
